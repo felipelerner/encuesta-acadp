@@ -1,0 +1,74 @@
+══════════════════════════════════════════════════════════════
+  ACADP · Formulario de Relevamiento — Instrucciones de deploy
+══════════════════════════════════════════════════════════════
+
+PASO 1 · Crear el backend en Google Sheets
+──────────────────────────────────────────
+1. Abrí Google Sheets → creá una planilla nueva
+   (nombre sugerido: "ACADP Relevamiento 2025")
+
+2. En el menú: Extensiones → Apps Script
+
+3. Borrá el código que trae por defecto y pegá
+   TODO el contenido del archivo apps-script.gs
+
+4. (Opcional) Cambiá la clave en la línea:
+      const SECRET_KEY = 'acadp2025';
+   Anotá la clave — la vas a necesitar para el panel admin.
+
+5. Guardá (Ctrl+S)
+
+6. Hacé clic en "Implementar" → "Nueva implementación"
+   · Tipo: Aplicación web
+   · Ejecutar como: Yo (tu cuenta de Google)
+   · Quién tiene acceso: Cualquier persona
+   → Clic en "Implementar"
+   → Copiá la URL que aparece (termina en /exec)
+
+PASO 2 · Configurar el formulario
+──────────────────────────────────
+1. Abrí formulario-acadp.html con un editor de texto
+   (Bloc de notas, VS Code, etc.)
+
+2. Buscá esta línea (cerca del final del archivo):
+      const SCRIPT_URL = 'TU_SCRIPT_URL_AQUI';
+
+3. Reemplazá TU_SCRIPT_URL_AQUI por la URL que copiaste
+   Ejemplo:
+      const SCRIPT_URL = 'https://script.google.com/macros/s/ABC.../exec';
+
+4. Guardá el archivo.
+
+PASO 3 · Publicar online (Netlify — gratis, sin cuenta)
+────────────────────────────────────────────────────────
+1. Entrá a: netlify.com/drop
+   (no necesitás crear cuenta para esto)
+
+2. Seleccioná la CARPETA completa "Encuesta interaeras"
+   y arrastrala al área de la página.
+
+3. En segundos vas a tener dos URLs:
+   · formulario-acadp.html → para compartir con el equipo
+   · admin.html            → para ver las respuestas
+
+   Las URLs tienen una forma como:
+   https://nombre-aleatorio.netlify.app/formulario-acadp.html
+   https://nombre-aleatorio.netlify.app/admin.html
+
+PASO 4 · Usar el panel admin
+─────────────────────────────
+1. Abrí la URL del admin.html
+2. Pegá la URL del Apps Script (la misma del Paso 1)
+3. Ingresá la clave (la que definiste en SECRET_KEY)
+4. Clic en "Ingresar"
+
+El panel muestra:
+  ✓ Estadísticas por área
+  ✓ Filtros por área, carga y búsqueda de texto
+  ✓ Vista detallada de cada respuesta
+  ✓ Exportación a CSV
+
+══════════════════════════════════════════════════════════════
+  ¿Dudas? El formulario y el panel ya están listos —
+  solo falta la URL del Apps Script para conectar todo.
+══════════════════════════════════════════════════════════════

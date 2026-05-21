@@ -1,0 +1,929 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Relevamiento de Áreas — ACADP</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    /* ── Tokens ── */
+    :root {
+      --pink:        #C4387F;
+      --pink-dark:   #8B1A5E;
+      --pink-light:  #F9E5EF;
+      --pink-mid:    #E8B4D0;
+      --orange:      #F5871F;
+      --orange-dark: #D46A10;
+      --text:        #1A1025;
+      --text-mid:    #5A4560;
+      --text-soft:   #9C86A4;
+      --border:      #E8D6E2;
+      --bg:          #FEFBFD;
+      --white:       #FFFFFF;
+      --radius:      10px;
+      --radius-sm:   6px;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+    }
+
+    /* ── Header ── */
+    .site-header {
+      background: var(--white);
+      border-bottom: 1px solid var(--border);
+      padding: 14px 24px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      box-shadow: 0 1px 8px rgba(196,56,127,0.07);
+    }
+    .logo-mark {
+      width: 36px; height: 36px;
+      background: var(--pink);
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+    }
+    .logo-mark svg { width: 22px; height: 22px; fill: white; }
+    .logo-text {
+      font-size: 17px;
+      font-weight: 700;
+      color: var(--pink-dark);
+      letter-spacing: 0.02em;
+    }
+    .logo-text span {
+      font-weight: 400;
+      color: var(--text-mid);
+      font-size: 13px;
+      margin-left: 8px;
+    }
+
+    /* ── Hero ── */
+    .hero {
+      background: linear-gradient(135deg, var(--pink-dark) 0%, var(--pink) 60%, #D4608A 100%);
+      padding: 48px 24px 52px;
+      text-align: center;
+      color: white;
+      position: relative;
+      overflow: hidden;
+    }
+    .hero::before {
+      content: '';
+      position: absolute; inset: 0;
+      background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.05'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+    }
+    .hero-tag {
+      display: inline-block;
+      background: rgba(255,255,255,0.18);
+      border: 1px solid rgba(255,255,255,0.3);
+      border-radius: 999px;
+      padding: 4px 16px;
+      font-size: 12px;
+      font-weight: 500;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      margin-bottom: 16px;
+    }
+    .hero h1 {
+      font-size: clamp(22px, 5vw, 32px);
+      font-weight: 700;
+      line-height: 1.25;
+      margin-bottom: 10px;
+    }
+    .hero p {
+      font-size: 15px;
+      opacity: 0.88;
+      max-width: 520px;
+      margin: 0 auto;
+      line-height: 1.65;
+    }
+
+    /* ── Progress ── */
+    .progress-wrap {
+      background: var(--white);
+      padding: 10px 24px;
+      border-bottom: 1px solid var(--border);
+      position: sticky;
+      top: 65px;
+      z-index: 99;
+    }
+    .progress-track {
+      max-width: 680px;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .progress-bar {
+      flex: 1;
+      height: 5px;
+      background: var(--pink-light);
+      border-radius: 999px;
+      overflow: hidden;
+    }
+    .progress-fill {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, var(--pink), var(--orange));
+      border-radius: 999px;
+      transition: width 0.4s ease;
+    }
+    .progress-pct {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--pink);
+      min-width: 36px;
+      text-align: right;
+    }
+
+    /* ── Main form layout ── */
+    .main {
+      max-width: 680px;
+      margin: 0 auto;
+      padding: 32px 16px 64px;
+    }
+
+    /* ── Anon toggle ── */
+    .anon-card {
+      background: var(--pink-light);
+      border: 1px solid var(--pink-mid);
+      border-radius: var(--radius);
+      padding: 14px 16px;
+      margin-bottom: 28px;
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      cursor: pointer;
+    }
+    .anon-card input[type="checkbox"] {
+      width: 18px; height: 18px;
+      margin-top: 1px;
+      accent-color: var(--pink);
+      cursor: pointer;
+      flex-shrink: 0;
+    }
+    .anon-card-text strong { font-size: 14px; color: var(--pink-dark); }
+    .anon-card-text p { font-size: 13px; color: var(--text-mid); margin-top: 2px; line-height: 1.5; }
+
+    /* ── Sections ── */
+    .section {
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 24px;
+      margin-bottom: 20px;
+    }
+
+    .section-head {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 20px;
+      padding-bottom: 14px;
+      border-bottom: 1px solid var(--border);
+    }
+    .section-icon {
+      width: 34px; height: 34px;
+      background: var(--pink-light);
+      border-radius: var(--radius-sm);
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+    }
+    .section-icon svg { width: 18px; height: 18px; stroke: var(--pink); fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+    .section-title { font-size: 15px; font-weight: 600; color: var(--text); }
+    .section-num {
+      margin-left: auto;
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--text-soft);
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      padding: 2px 10px;
+    }
+
+    /* ── Fields ── */
+    .field { margin-bottom: 18px; }
+    .field:last-child { margin-bottom: 0; }
+
+    .field > label,
+    .field-label {
+      display: block;
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--text);
+      margin-bottom: 5px;
+      line-height: 1.4;
+    }
+
+    .field .hint {
+      display: block;
+      font-size: 12px;
+      color: var(--text-soft);
+      margin-bottom: 6px;
+      line-height: 1.55;
+    }
+
+    input[type="text"],
+    select,
+    textarea {
+      width: 100%;
+      font-family: 'Inter', sans-serif;
+      font-size: 14px;
+      color: var(--text);
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 9px 12px;
+      outline: none;
+      transition: border-color 0.15s, box-shadow 0.15s;
+    }
+    input[type="text"]:focus,
+    select:focus,
+    textarea:focus {
+      border-color: var(--pink);
+      box-shadow: 0 0 0 3px rgba(196,56,127,0.1);
+    }
+    select { cursor: pointer; }
+    textarea { resize: vertical; min-height: 88px; line-height: 1.55; }
+
+    .name-wrap { overflow: hidden; max-height: 120px; transition: max-height 0.25s, opacity 0.2s; }
+    .name-wrap.hidden { max-height: 0; opacity: 0; pointer-events: none; }
+
+    /* ── Task table ── */
+    .tasks-head {
+      display: grid;
+      grid-template-columns: 2fr 1fr 1fr 32px;
+      gap: 8px;
+      margin-bottom: 6px;
+    }
+    .tasks-head span {
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-soft);
+    }
+    .task-row {
+      display: grid;
+      grid-template-columns: 2fr 1fr 1fr 32px;
+      gap: 8px;
+      margin-bottom: 8px;
+      align-items: start;
+    }
+    .task-row input,
+    .task-row select { font-size: 13px; padding: 8px 10px; }
+
+    .remove-btn {
+      width: 32px; height: 36px;
+      display: flex; align-items: center; justify-content: center;
+      background: none;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      color: var(--text-soft);
+      cursor: pointer;
+      font-size: 16px;
+      transition: background 0.15s, color 0.15s;
+      margin-top: 1px;
+    }
+    .remove-btn:hover { background: #FEE2E2; color: #DC2626; border-color: #FCA5A5; }
+
+    .add-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-family: 'Inter', sans-serif;
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--pink);
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 6px 0;
+    }
+    .add-btn:hover { text-decoration: underline; }
+    .add-btn svg { width: 15px; height: 15px; stroke: currentColor; fill: none; stroke-width: 2.5; stroke-linecap: round; }
+
+    /* ── Suggestion box ── */
+    .suggestion {
+      margin-top: 10px;
+      background: linear-gradient(135deg, #FFF8EC, #FFF2F8);
+      border: 1px solid #F5D4A8;
+      border-radius: var(--radius-sm);
+      padding: 12px 14px;
+    }
+    .suggestion-label {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--orange-dark);
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .suggestion-label svg { width: 14px; height: 14px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+    .suggestion textarea {
+      min-height: 68px;
+      font-size: 13px;
+      background: white;
+    }
+
+    /* ── Carga scale ── */
+    .carga-scale {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 8px;
+      margin-top: 8px;
+    }
+    .carga-btn {
+      width: 100%; height: 44px;
+      font-family: 'Inter', sans-serif;
+      font-size: 15px;
+      font-weight: 600;
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius-sm);
+      background: var(--bg);
+      color: var(--text-mid);
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .carga-btn:hover { border-color: var(--pink-mid); background: var(--pink-light); }
+    .carga-btn.active {
+      background: var(--pink);
+      color: white;
+      border-color: var(--pink);
+      box-shadow: 0 2px 8px rgba(196,56,127,0.3);
+    }
+    .carga-labels {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 8px;
+      font-size: 11px;
+      color: var(--text-soft);
+      margin-top: 4px;
+    }
+    .carga-labels span { text-align: center; }
+    .carga-labels span:first-child { text-align: left; }
+    .carga-labels span:last-child  { text-align: right; }
+
+    /* ── Slider horas ── */
+    .slider-wrap {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin-top: 10px;
+    }
+    input[type="range"] {
+      flex: 1;
+      height: 5px;
+      accent-color: var(--pink);
+      cursor: pointer;
+      background: var(--pink-light);
+      border-radius: 999px;
+      outline: none;
+      border: none;
+      padding: 0;
+    }
+    .slider-display {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text-mid);
+      min-width: 68px;
+      text-align: right;
+      white-space: nowrap;
+    }
+    .slider-display strong {
+      font-size: 22px;
+      font-weight: 700;
+      color: var(--pink-dark);
+    }
+    .slider-scale-labels {
+      display: flex;
+      justify-content: space-between;
+      font-size: 11px;
+      color: var(--text-soft);
+      margin-top: 4px;
+    }
+
+    /* ── Submit ── */
+    .submit-section {
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 24px;
+      text-align: center;
+    }
+    .submit-section p {
+      font-size: 13px;
+      color: var(--text-mid);
+      margin-bottom: 16px;
+      line-height: 1.55;
+    }
+    .submit-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-family: 'Inter', sans-serif;
+      font-size: 15px;
+      font-weight: 600;
+      color: white;
+      background: var(--orange);
+      border: none;
+      border-radius: var(--radius);
+      padding: 12px 36px;
+      cursor: pointer;
+      transition: background 0.15s, transform 0.1s, box-shadow 0.15s;
+      box-shadow: 0 3px 12px rgba(245,135,31,0.35);
+    }
+    .submit-btn:hover {
+      background: var(--orange-dark);
+      box-shadow: 0 4px 16px rgba(245,135,31,0.45);
+    }
+    .submit-btn:active { transform: scale(0.98); }
+    .submit-btn svg { width: 18px; height: 18px; stroke: currentColor; fill: none; stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round; }
+
+    /* ── States ── */
+    .toast {
+      position: fixed;
+      bottom: 24px;
+      left: 50%;
+      transform: translateX(-50%) translateY(80px);
+      background: var(--text);
+      color: white;
+      padding: 12px 24px;
+      border-radius: var(--radius);
+      font-size: 14px;
+      font-weight: 500;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.18);
+      z-index: 999;
+      transition: transform 0.3s ease;
+      white-space: nowrap;
+    }
+    .toast.show { transform: translateX(-50%) translateY(0); }
+    .toast.success { background: #15803D; }
+    .toast.error   { background: #DC2626; }
+
+    .overlay {
+      display: none;
+      position: fixed; inset: 0;
+      background: rgba(139,26,94,0.6);
+      z-index: 200;
+      align-items: center; justify-content: center;
+    }
+    .overlay.show { display: flex; }
+    .success-card {
+      background: white;
+      border-radius: 16px;
+      padding: 40px 32px;
+      text-align: center;
+      max-width: 380px;
+      margin: 16px;
+    }
+    .success-icon {
+      width: 64px; height: 64px;
+      background: #DCFCE7;
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      margin: 0 auto 16px;
+    }
+    .success-icon svg { width: 32px; height: 32px; stroke: #16A34A; fill: none; stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round; }
+    .success-card h2 { font-size: 20px; font-weight: 700; color: var(--text); margin-bottom: 8px; }
+    .success-card p { font-size: 14px; color: var(--text-mid); line-height: 1.6; margin-bottom: 20px; }
+    .success-card button {
+      font-family: 'Inter', sans-serif;
+      font-size: 14px;
+      font-weight: 600;
+      color: white;
+      background: var(--pink);
+      border: none;
+      border-radius: var(--radius-sm);
+      padding: 10px 28px;
+      cursor: pointer;
+    }
+
+    /* ── Footer ── */
+    .site-footer {
+      background: var(--pink-dark);
+      color: rgba(255,255,255,0.75);
+      text-align: center;
+      padding: 28px 16px;
+      font-size: 13px;
+    }
+    .site-footer img { height: 32px; width: auto; margin-bottom: 10px; display: block; margin-left: auto; margin-right: auto; }
+    .site-footer strong { color: white; }
+
+    @media (max-width: 520px) {
+      .tasks-head { grid-template-columns: 1fr; display: none; }
+      .task-row { grid-template-columns: 1fr 1fr; }
+      .task-row input:first-child { grid-column: 1 / -1; }
+      .remove-btn { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- Header -->
+<header class="site-header">
+  <div class="logo-mark" style="background:var(--pink);border-radius:8px;padding:5px;width:auto;height:36px;display:flex;align-items:center;">
+    <img src="https://www.acadp.org.ar/wp-content/uploads/2025/12/ACADP-LOGO_logotipo-blanco.png" alt="ACADP" style="height:26px;width:auto;display:block;" />
+  </div>
+  <div>
+    <div class="logo-text"><span>Relevamiento interno</span></div>
+  </div>
+</header>
+
+<!-- Hero -->
+<div class="hero">
+  <div class="hero-tag">Formulario confidencial · 2025</div>
+  <h1>Conocé mejor tu área</h1>
+  <p>Este formulario nos ayuda a entender cómo trabaja cada área para detectar oportunidades de mejora y automatización. Podés responder de forma anónima si preferís.</p>
+</div>
+
+<!-- Progress bar -->
+<div class="progress-wrap">
+  <div class="progress-track">
+    <div class="progress-bar"><div class="progress-fill" id="prog"></div></div>
+    <span class="progress-pct" id="pct">0%</span>
+  </div>
+</div>
+
+<!-- Main form -->
+<main class="main">
+
+  <!-- Anon toggle -->
+  <label class="anon-card">
+    <input type="checkbox" id="anon-check" onchange="toggleAnon(this)" />
+    <div class="anon-card-text">
+      <strong>Quiero responder de forma anónima</strong>
+      <p>No se guardará tu nombre. Tus respuestas son igual de valiosas sin importar si te identificás o no.</p>
+    </div>
+  </label>
+
+  <!-- Sección 1: Identificación -->
+  <div class="section">
+    <div class="section-head">
+      <div class="section-icon">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
+      </div>
+      <span class="section-title">Identificación</span>
+      <span class="section-num">1 / 4</span>
+    </div>
+
+    <div class="field">
+      <label for="area">¿En qué área trabajás? <span style="color:var(--pink)">*</span></label>
+      <select id="area" onchange="updateProgress()" required>
+        <option value="">— Seleccioná tu área —</option>
+        <option value="Presidencia">Presidencia</option>
+        <option value="Dirección ejecutiva">Dirección ejecutiva</option>
+        <option value="Secretaría">Secretaría</option>
+        <option value="Administración">Administración</option>
+        <option value="Educativa">Educativa</option>
+        <option value="Servicios">Servicios</option>
+        <option value="Comunicación">Comunicación</option>
+      </select>
+    </div>
+
+    <div class="field">
+      <label for="rol">¿Cuál es tu rol dentro del área? <span style="color:var(--pink)">*</span></label>
+      <input type="text" id="rol" placeholder="Ej: tutora, coordinadora, administrativa, responsable de redes…" />
+    </div>
+
+    <div class="name-wrap" id="name-wrap">
+      <div class="field">
+        <label for="responsable">Tu nombre <span style="font-size:12px; font-weight:400; color:var(--text-soft)">(opcional)</span></label>
+        <input type="text" id="responsable" placeholder="Podés dejarlo en blanco si preferís" />
+      </div>
+    </div>
+  </div>
+
+  <!-- Sección 2: Tareas -->
+  <div class="section">
+    <div class="section-head">
+      <div class="section-icon">
+        <svg viewBox="0 0 24 24"><rect x="9" y="3" width="6" height="4" rx="1"/><path d="M5 7h14a1 1 0 0 1 1 1v11a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V8a1 1 0 0 1 1-1z"/><path d="M9 12h6M9 16h4"/></svg>
+      </div>
+      <span class="section-title">Tus tareas cotidianas</span>
+      <span class="section-num">2 / 4</span>
+    </div>
+
+    <div class="field">
+      <label class="field-label">¿Cuáles son las principales tareas que hacés en tu trabajo?</label>
+      <span class="hint">Incluí las que se repiten semana a semana — aunque parezcan pequeñas o rutinarias.</span>
+
+      <div class="tasks-head">
+        <span>Tarea</span>
+        <span>Frecuencia</span>
+        <span>Tiempo aprox.</span>
+        <span></span>
+      </div>
+      <div id="task-list">
+        <div class="task-row">
+          <input type="text" placeholder="Describí la tarea" />
+          <select>
+            <option value="">Frecuencia</option>
+            <option>Diaria</option>
+            <option>Semanal</option>
+            <option>Mensual</option>
+            <option>Puntual</option>
+          </select>
+          <input type="text" placeholder="Ej: 2 hs/sem" />
+          <button class="remove-btn" onclick="removeTask(this)" title="Eliminar">×</button>
+        </div>
+      </div>
+      <button class="add-btn" onclick="addTask()">
+        <svg viewBox="0 0 16 16"><path d="M8 2v12M2 8h12"/></svg>
+        Agregar tarea
+      </button>
+    </div>
+
+    <div class="field">
+      <label class="field-label">¿Cuáles de esas tareas se hacen "a mano" y podrían automatizarse o simplificarse?</label>
+      <span class="hint">Pensá en cosas que repetís mucho: responder las mismas preguntas, cargar datos, mandar recordatorios, etc.</span>
+      <textarea id="tareas-manuales" placeholder="Ej: mandar el mismo mensaje de bienvenida a cada alumna nueva, completar planillas a mano, buscar información en varios chats…" onchange="updateProgress()"></textarea>
+    </div>
+  </div>
+
+  <!-- Sección 3: Coordinación y trabas -->
+  <div class="section">
+    <div class="section-head">
+      <div class="section-icon">
+        <svg viewBox="0 0 24 24"><path d="M17 12h-5l-4-4m0 8l4-4"/><circle cx="6" cy="8" r="2"/><circle cx="6" cy="16" r="2"/><circle cx="18" cy="12" r="2"/></svg>
+      </div>
+      <span class="section-title">Coordinación con otras áreas</span>
+      <span class="section-num">3 / 4</span>
+    </div>
+
+    <div class="field">
+      <label class="field-label">¿Hay tareas tuyas que dependen de otra área o persona para poder avanzar?</label>
+      <span class="hint">Por ejemplo: esperás una confirmación, información, o que alguien haga algo antes de poder continuar.</span>
+      <textarea id="dependencias" placeholder="Ej: no puedo enviar el certificado hasta que Administración confirme el pago. No puedo publicar hasta que Coordinación apruebe el contenido…" onchange="updateProgress()"></textarea>
+
+      <div class="suggestion">
+        <div class="suggestion-label">
+          <svg viewBox="0 0 24 24"><path d="M12 2a7 7 0 0 1 7 7c0 3-1.8 5.5-4 6.5V18H9v-2.5C6.8 14.5 5 12 5 9a7 7 0 0 1 7-7z"/><path d="M9 22h6"/></svg>
+          ¿Cómo lo mejorarías sin sumar personas al equipo?
+        </div>
+        <textarea id="mejoras-dep" placeholder="Ej: si hubiera un formulario automático que avise cuando el pago se acredita, no necesitaría esperar la confirmación manual…"></textarea>
+      </div>
+    </div>
+
+    <div class="field">
+      <label class="field-label">¿Qué se traba o demora con más frecuencia en tu trabajo?</label>
+      <span class="hint">Ejemplos concretos ayudan mucho a entender el problema real.</span>
+      <textarea id="trabas" placeholder="Ej: la información llega tarde, hay dudas sobre quién hace qué, los datos están en distintos lugares…" onchange="updateProgress()"></textarea>
+
+      <div class="suggestion">
+        <div class="suggestion-label">
+          <svg viewBox="0 0 24 24"><path d="M12 2a7 7 0 0 1 7 7c0 3-1.8 5.5-4 6.5V18H9v-2.5C6.8 14.5 5 12 5 9a7 7 0 0 1 7-7z"/><path d="M9 22h6"/></svg>
+          ¿Se te ocurre alguna forma de resolverlo sin contratar más personas?
+        </div>
+        <textarea id="mejoras-trabas" placeholder="Ej: una planilla compartida, un sistema de avisos automáticos, un protocolo claro de qué hacer en cada caso…"></textarea>
+      </div>
+    </div>
+  </div>
+
+  <!-- Sección 4: Carga y mejoras -->
+  <div class="section">
+    <div class="section-head">
+      <div class="section-icon">
+        <svg viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+      </div>
+      <span class="section-title">Carga de trabajo y mejoras</span>
+      <span class="section-num">4 / 4</span>
+    </div>
+
+    <div class="field">
+      <label class="field-label">¿Cómo percibís tu carga de trabajo actual?</label>
+      <div class="carga-scale" id="carga-scale">
+        <button class="carga-btn" onclick="setCarga(this, 1)" title="Muy liviana">1</button>
+        <button class="carga-btn" onclick="setCarga(this, 2)" title="Liviana">2</button>
+        <button class="carga-btn" onclick="setCarga(this, 3)" title="Moderada">3</button>
+        <button class="carga-btn" onclick="setCarga(this, 4)" title="Pesada">4</button>
+        <button class="carga-btn" onclick="setCarga(this, 5)" title="Muy pesada">5</button>
+      </div>
+      <div class="carga-labels">
+        <span>Muy liviana</span><span></span><span>Moderada</span><span></span><span>Muy pesada</span>
+      </div>
+      <input type="hidden" id="carga-val" />
+    </div>
+
+    <div class="field">
+      <label class="field-label">¿Cuántas horas por día le dedicás a tu trabajo en ACADP?</label>
+      <span class="hint">Incluí todas las horas: reuniones, tareas, mensajes, seguimientos — aunque no sean en horario fijo.</span>
+      <div class="slider-wrap">
+        <input type="range" id="horas-slider" min="1" max="12" value="4" oninput="updateHoras(this)" />
+        <div class="slider-display"><strong id="horas-val">4</strong> hs/día</div>
+      </div>
+      <div class="slider-scale-labels"><span>1 hs</span><span>6 hs</span><span>12 hs</span></div>
+    </div>
+
+    <div class="field">
+      <label for="picos">¿Hay momentos del año en que la carga se dispara?</label>
+      <span class="hint">Por ejemplo: inicio de cohorte, cierre de inscripciones, eventos, etc.</span>
+      <textarea id="picos" placeholder="Describí los picos y qué los genera."></textarea>
+    </div>
+
+    <div class="field">
+      <label for="cambios">Si pudieras mejorar algo de tu área o de tu trabajo, ¿qué cambiarías?</label>
+      <span class="hint">Puede ser un proceso, una herramienta, una forma de coordinarse, algo que hoy lleva demasiado tiempo.</span>
+      <textarea id="cambios" placeholder="Contanos lo que ves desde tu lugar — cualquier idea suma." onchange="updateProgress()"></textarea>
+
+      <div class="suggestion">
+        <div class="suggestion-label">
+          <svg viewBox="0 0 24 24"><path d="M12 2a7 7 0 0 1 7 7c0 3-1.8 5.5-4 6.5V18H9v-2.5C6.8 14.5 5 12 5 9a7 7 0 0 1 7-7z"/><path d="M9 22h6"/></svg>
+          ¿Cómo lo implementarías sin contratar personas nuevas?
+        </div>
+        <textarea id="implementacion" placeholder="Ej: usando una herramienta, cambiando cómo se coordina algo, automatizando un paso del proceso…"></textarea>
+      </div>
+    </div>
+  </div>
+
+  <!-- Submit -->
+  <div class="submit-section">
+    <p>Revisá tus respuestas antes de enviar. Podés volver a completar el formulario si necesitás actualizar algo.</p>
+    <button class="submit-btn" onclick="submitForm()">
+      <svg viewBox="0 0 24 24"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+      Enviar respuestas
+    </button>
+  </div>
+
+</main>
+
+<footer class="site-footer">
+  <img src="https://www.acadp.org.ar/wp-content/uploads/2025/12/ACADP-LOGO_logotipo-blanco.png" alt="ACADP" />
+  Asociación Civil Argentina de Puericultura · Buenos Aires, Argentina
+</footer>
+
+<!-- Success overlay -->
+<div class="overlay" id="success-overlay">
+  <div class="success-card">
+    <div class="success-icon">
+      <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+    </div>
+    <h2>¡Gracias por tu respuesta!</h2>
+    <p>Tus respuestas fueron registradas correctamente. Cada aporte nos ayuda a mejorar cómo trabajamos juntas.</p>
+    <button onclick="document.getElementById('success-overlay').classList.remove('show'); location.reload()">Cerrar</button>
+  </div>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<script>
+  /* ─── CONFIGURACIÓN ──────────────────────────────────────────── */
+  // Pegá aquí la URL de tu Google Apps Script (ver instrucciones.txt)
+  const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbw04sgXvpm94OnVaVMqj-zzeugib03NLjcJ7JDsd263VfqLAVUYvjk1IIKQZyCdK-y_A/exec';
+  /* ─────────────────────────────────────────────────────────────── */
+
+  let cargaVal = null;
+
+  function toggleAnon(cb) {
+    document.getElementById('name-wrap').classList.toggle('hidden', cb.checked);
+    updateProgress();
+  }
+
+  function addTask() {
+    const list = document.getElementById('task-list');
+    const row = document.createElement('div');
+    row.className = 'task-row';
+    row.innerHTML = `
+      <input type="text" placeholder="Describí la tarea" oninput="updateProgress()" />
+      <select onchange="updateProgress()">
+        <option value="">Frecuencia</option>
+        <option>Diaria</option>
+        <option>Semanal</option>
+        <option>Mensual</option>
+        <option>Puntual</option>
+      </select>
+      <input type="text" placeholder="Ej: 2 hs/sem" />
+      <button class="remove-btn" onclick="removeTask(this)" title="Eliminar">×</button>
+    `;
+    list.appendChild(row);
+    row.querySelector('input').focus();
+    updateProgress();
+  }
+
+  function removeTask(btn) {
+    const rows = document.querySelectorAll('#task-list .task-row');
+    if (rows.length <= 1) return;
+    btn.closest('.task-row').remove();
+    updateProgress();
+  }
+
+  function updateHoras(input) {
+    document.getElementById('horas-val').textContent = input.value;
+    updateProgress();
+  }
+
+  function setCarga(btn, val) {
+    document.querySelectorAll('.carga-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    cargaVal = val;
+    document.getElementById('carga-val').value = val;
+    updateProgress();
+  }
+
+  function updateProgress() {
+    const required = [
+      document.getElementById('area').value,
+      document.getElementById('rol').value,
+    ];
+    const optional = [
+      document.getElementById('tareas-manuales').value,
+      document.getElementById('dependencias').value,
+      document.getElementById('trabas').value,
+      document.getElementById('cambios').value,
+      cargaVal ? '1' : '',
+    ];
+    const all = [...required, ...optional];
+    const filled = all.filter(v => v && v.trim()).length;
+    const pct = Math.round((filled / all.length) * 100);
+    document.getElementById('prog').style.width = pct + '%';
+    document.getElementById('pct').textContent = pct + '%';
+  }
+
+  function showToast(msg, type = '') {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.className = 'toast show ' + type;
+    setTimeout(() => t.classList.remove('show'), 3500);
+  }
+
+  function getTasksData() {
+    return Array.from(document.querySelectorAll('#task-list .task-row')).map(row => {
+      const inputs = row.querySelectorAll('input, select');
+      return {
+        tarea: inputs[0].value,
+        frecuencia: inputs[1].value,
+        tiempo: inputs[2].value,
+      };
+    }).filter(t => t.tarea.trim());
+  }
+
+  async function submitForm() {
+    const area = document.getElementById('area').value;
+    const rol  = document.getElementById('rol').value;
+
+    if (!area) { showToast('Seleccioná tu área antes de enviar', 'error'); return; }
+    if (!rol.trim()) { showToast('Indicá tu rol dentro del área', 'error'); return; }
+
+    if (!SCRIPT_URL || SCRIPT_URL === 'TU_SCRIPT_URL_AQUI') {
+      showToast('El formulario no está configurado todavía (falta SCRIPT_URL)', 'error');
+      return;
+    }
+
+    const payload = {
+      timestamp:      new Date().toISOString(),
+      anonimo:        document.getElementById('anon-check').checked,
+      responsable:    document.getElementById('responsable')?.value || '',
+      area,
+      rol,
+      tareas:         JSON.stringify(getTasksData()),
+      tareasManuales: document.getElementById('tareas-manuales').value,
+      dependencias:   document.getElementById('dependencias').value,
+      mejorasDep:     document.getElementById('mejoras-dep').value,
+      trabas:         document.getElementById('trabas').value,
+      mejorasTrabas:  document.getElementById('mejoras-trabas').value,
+      carga:          cargaVal || '',
+      horasDia:       document.getElementById('horas-slider').value,
+      picos:          document.getElementById('picos').value,
+      cambios:        document.getElementById('cambios').value,
+      implementacion: document.getElementById('implementacion').value,
+    };
+
+    const btn = document.querySelector('.submit-btn');
+    btn.disabled = true;
+    btn.textContent = 'Enviando…';
+
+    try {
+      await fetch(SCRIPT_URL, {
+        method: 'POST',
+        mode: 'no-cors',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+      document.getElementById('success-overlay').classList.add('show');
+    } catch (err) {
+      showToast('Error al enviar. Revisá tu conexión e intentá de nuevo.', 'error');
+    } finally {
+      btn.disabled = false;
+      btn.innerHTML = `<svg viewBox="0 0 24 24" style="width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg> Enviar respuestas`;
+    }
+  }
+
+  document.addEventListener('input', updateProgress);
+  document.addEventListener('change', updateProgress);
+</script>
+</body>
+</html>

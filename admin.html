@@ -1,0 +1,584 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Panel de Respuestas — ACADP</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --pink:        #C4387F;
+      --pink-dark:   #8B1A5E;
+      --pink-light:  #F9E5EF;
+      --pink-mid:    #E8B4D0;
+      --orange:      #F5871F;
+      --text:        #1A1025;
+      --text-mid:    #5A4560;
+      --text-soft:   #9C86A4;
+      --border:      #E8D6E2;
+      --bg:          #FEFBFD;
+      --white:       #FFFFFF;
+      --radius:      10px;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+
+    .header {
+      background: var(--pink-dark);
+      color: white;
+      padding: 16px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+    .header-left { display: flex; align-items: center; gap: 12px; }
+    .logo-mark {
+      width: 36px; height: 36px;
+      background: rgba(255,255,255,0.15);
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .logo-mark svg { width: 22px; height: 22px; fill: white; }
+    .header h1 { font-size: 16px; font-weight: 700; }
+    .header p  { font-size: 12px; opacity: 0.75; margin-top: 1px; }
+    .header-right { display: flex; gap: 10px; align-items: center; }
+    .btn {
+      font-family: 'Inter', sans-serif;
+      font-size: 13px;
+      font-weight: 500;
+      padding: 8px 18px;
+      border-radius: 6px;
+      border: none;
+      cursor: pointer;
+      transition: opacity 0.15s;
+    }
+    .btn:hover { opacity: 0.85; }
+    .btn-orange { background: var(--orange); color: white; }
+    .btn-outline { background: rgba(255,255,255,0.12); color: white; border: 1px solid rgba(255,255,255,0.25); }
+
+    /* Login */
+    .login-wrap {
+      max-width: 420px;
+      margin: 60px auto;
+      padding: 0 16px;
+    }
+    .login-card {
+      background: white;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 32px;
+      text-align: center;
+    }
+    .login-card h2 { font-size: 18px; font-weight: 700; margin-bottom: 6px; }
+    .login-card p  { font-size: 13px; color: var(--text-mid); margin-bottom: 24px; line-height: 1.5; }
+    .login-card input {
+      width: 100%;
+      font-family: 'Inter', sans-serif;
+      font-size: 14px;
+      padding: 10px 14px;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      margin-bottom: 12px;
+      outline: none;
+    }
+    .login-card input:focus { border-color: var(--pink); box-shadow: 0 0 0 3px rgba(196,56,127,0.1); }
+    .login-card .btn-login {
+      width: 100%;
+      font-family: 'Inter', sans-serif;
+      font-size: 14px;
+      font-weight: 600;
+      padding: 11px;
+      background: var(--pink);
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+    .login-card .btn-login:hover { background: var(--pink-dark); }
+    .login-error { color: #DC2626; font-size: 13px; margin-top: 8px; display: none; }
+
+    /* Dashboard */
+    #dashboard { display: none; }
+    .main { max-width: 1200px; margin: 0 auto; padding: 28px 16px 64px; }
+
+    /* Stats */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      gap: 14px;
+      margin-bottom: 24px;
+    }
+    .stat-card {
+      background: white;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 18px 20px;
+    }
+    .stat-card .label { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-soft); margin-bottom: 6px; }
+    .stat-card .value { font-size: 28px; font-weight: 700; color: var(--pink-dark); line-height: 1; }
+    .stat-card .sub   { font-size: 12px; color: var(--text-soft); margin-top: 4px; }
+
+    /* Filters */
+    .filters {
+      background: white;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 14px 18px;
+      margin-bottom: 18px;
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+    .filters select, .filters input {
+      font-family: 'Inter', sans-serif;
+      font-size: 13px;
+      padding: 7px 11px;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      background: var(--bg);
+      color: var(--text);
+      outline: none;
+    }
+    .filters select:focus, .filters input:focus { border-color: var(--pink); }
+    .filters label { font-size: 13px; font-weight: 500; color: var(--text-mid); }
+
+    /* Table */
+    .table-wrap {
+      background: white;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+    }
+    .table-scroll { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    thead { background: var(--pink-light); }
+    th {
+      padding: 11px 14px;
+      text-align: left;
+      font-weight: 600;
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--pink-dark);
+      white-space: nowrap;
+    }
+    td {
+      padding: 11px 14px;
+      border-top: 1px solid var(--border);
+      vertical-align: top;
+      color: var(--text);
+      max-width: 280px;
+    }
+    tr:hover td { background: #FDFAFC; }
+    .cell-long {
+      white-space: normal;
+      line-height: 1.5;
+      color: var(--text-mid);
+      font-size: 12px;
+    }
+    .cell-long.collapsed {
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+      cursor: pointer;
+    }
+    .cell-long.collapsed:hover { color: var(--pink); }
+
+    .badge {
+      display: inline-block;
+      font-size: 11px;
+      font-weight: 600;
+      padding: 3px 10px;
+      border-radius: 999px;
+      white-space: nowrap;
+    }
+    .badge-sec  { background: #EDE9FE; color: #5B21B6; }
+    .badge-adm  { background: #D1FAE5; color: #065F46; }
+    .badge-edu  { background: #DBEAFE; color: #1E40AF; }
+    .badge-ser  { background: #FEF9C3; color: #854D0E; }
+    .badge-com  { background: #FCE7F3; color: #9D174D; }
+
+    .carga-dot {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 28px; height: 28px;
+      border-radius: 50%;
+      font-weight: 700;
+      font-size: 14px;
+    }
+    .c1 { background: #D1FAE5; color: #065F46; }
+    .c2 { background: #FEF9C3; color: #854D0E; }
+    .c3 { background: #FED7AA; color: #92400E; }
+    .c4 { background: #FECACA; color: #991B1B; }
+    .c5 { background: #DC2626; color: white; }
+
+    .anon-tag { font-size: 11px; color: var(--text-soft); font-style: italic; }
+
+    /* Detail panel */
+    .detail-overlay {
+      display: none;
+      position: fixed; inset: 0;
+      background: rgba(139,26,94,0.5);
+      z-index: 300;
+    }
+    .detail-overlay.open { display: block; }
+    .detail-panel {
+      position: fixed;
+      right: 0; top: 0; bottom: 0;
+      width: min(560px, 100vw);
+      background: white;
+      overflow-y: auto;
+      padding: 28px;
+      box-shadow: -8px 0 32px rgba(0,0,0,0.12);
+      transform: translateX(100%);
+      transition: transform 0.25s ease;
+    }
+    .detail-overlay.open .detail-panel { transform: translateX(0); }
+    .detail-close {
+      float: right;
+      background: var(--pink-light);
+      border: none;
+      color: var(--pink-dark);
+      font-size: 18px;
+      width: 32px; height: 32px;
+      border-radius: 50%;
+      cursor: pointer;
+      font-weight: 700;
+    }
+    .detail-panel h2 { font-size: 16px; font-weight: 700; margin-bottom: 4px; }
+    .detail-panel .meta { font-size: 12px; color: var(--text-soft); margin-bottom: 20px; }
+    .detail-section { margin-bottom: 20px; }
+    .detail-section h3 {
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--text-soft);
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 6px;
+      margin-bottom: 10px;
+    }
+    .detail-q { font-size: 12px; font-weight: 500; color: var(--text-mid); margin-bottom: 3px; }
+    .detail-a { font-size: 13px; color: var(--text); line-height: 1.6; margin-bottom: 12px; white-space: pre-wrap; }
+    .detail-a.empty { color: var(--text-soft); font-style: italic; }
+
+    .no-data {
+      text-align: center;
+      padding: 60px 20px;
+      color: var(--text-soft);
+    }
+    .no-data p { font-size: 15px; margin-bottom: 6px; }
+    .no-data small { font-size: 13px; }
+
+    .loading {
+      text-align: center;
+      padding: 48px;
+      color: var(--text-soft);
+      font-size: 14px;
+    }
+
+    @media (max-width: 600px) {
+      th, td { padding: 9px 10px; }
+      .stat-card .value { font-size: 22px; }
+    }
+  </style>
+</head>
+<body>
+
+<header class="header">
+  <div class="header-left">
+    <div class="logo-mark">
+      <svg viewBox="0 0 24 24"><path d="M12 2C9.5 2 7.5 3.5 7.5 5.5C7.5 7.5 9.5 9 12 9C14.5 9 16.5 7.5 16.5 5.5C16.5 3.5 14.5 2 12 2Z"/><path d="M4 20C4 15.5 7.5 12 12 12C16.5 12 20 15.5 20 20" stroke="white" stroke-width="1.5" fill="none"/></svg>
+    </div>
+    <div>
+      <h1>Panel de Respuestas</h1>
+      <p>ACADP · Relevamiento de áreas</p>
+    </div>
+  </div>
+  <div class="header-right" id="header-actions" style="display:none">
+    <button class="btn btn-outline" onclick="loadData()">↻ Actualizar</button>
+    <button class="btn btn-orange" onclick="exportCSV()">↓ Exportar CSV</button>
+  </div>
+</header>
+
+<!-- Login -->
+<div id="login-wrap" class="login-wrap">
+  <div class="login-card">
+    <h2>Acceso al panel</h2>
+    <p>Este panel muestra todas las respuestas del formulario de relevamiento. Ingresá la clave de acceso para continuar.</p>
+    <input type="url" id="script-url" placeholder="URL del Google Apps Script" />
+    <input type="password" id="secret-key" placeholder="Clave de acceso (SECRET_KEY)" onkeydown="if(event.key==='Enter') doLogin()" />
+    <button class="btn-login" onclick="doLogin()">Ingresar</button>
+    <p class="login-error" id="login-error">Clave incorrecta o URL inválida.</p>
+  </div>
+</div>
+
+<!-- Dashboard -->
+<div id="dashboard">
+  <div class="main">
+    <div class="stats-grid" id="stats-grid"></div>
+
+    <div class="filters">
+      <label>Filtrar por área:</label>
+      <select id="filter-area" onchange="renderTable()">
+        <option value="">Todas</option>
+        <option>Secretaría</option>
+        <option>Administración</option>
+        <option>Educativa</option>
+        <option>Servicios</option>
+        <option>Comunicación</option>
+      </select>
+      <label>Carga:</label>
+      <select id="filter-carga" onchange="renderTable()">
+        <option value="">Cualquiera</option>
+        <option value="1">1 — Muy liviana</option>
+        <option value="2">2</option>
+        <option value="3">3 — Moderada</option>
+        <option value="4">4</option>
+        <option value="5">5 — Muy pesada</option>
+      </select>
+      <input type="search" id="filter-text" placeholder="Buscar en respuestas…" oninput="renderTable()" style="flex:1;min-width:180px" />
+    </div>
+
+    <div class="table-wrap">
+      <div class="table-scroll">
+        <div id="table-container" class="loading">Cargando respuestas…</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Detail panel -->
+<div class="detail-overlay" id="detail-overlay" onclick="closeDetail(event)">
+  <div class="detail-panel" id="detail-panel">
+    <button class="detail-close" onclick="closeDetailPanel()">×</button>
+    <div id="detail-content"></div>
+  </div>
+</div>
+
+<script>
+  let allRows = [];
+  let scriptUrl = '';
+  let secretKey = '';
+
+  function doLogin() {
+    scriptUrl = document.getElementById('script-url').value.trim();
+    secretKey  = document.getElementById('secret-key').value.trim();
+    if (!scriptUrl || !secretKey) {
+      document.getElementById('login-error').style.display = 'block';
+      document.getElementById('login-error').textContent = 'Completá la URL y la clave.';
+      return;
+    }
+    loadData();
+  }
+
+  async function loadData() {
+    document.getElementById('table-container').innerHTML = '<div class="loading">Cargando respuestas…</div>';
+    try {
+      const url = `${scriptUrl}?key=${encodeURIComponent(secretKey)}`;
+      const res  = await fetch(url);
+      const data = await res.json();
+      if (data.error) {
+        document.getElementById('login-error').style.display = 'block';
+        document.getElementById('login-error').textContent = 'Clave incorrecta.';
+        return;
+      }
+      allRows = data.rows || [];
+      document.getElementById('login-wrap').style.display = 'none';
+      document.getElementById('dashboard').style.display = 'block';
+      document.getElementById('header-actions').style.display = 'flex';
+      renderStats();
+      renderTable();
+    } catch (e) {
+      document.getElementById('login-error').style.display = 'block';
+      document.getElementById('login-error').textContent = 'No se pudo conectar. Verificá la URL.';
+    }
+  }
+
+  function renderStats() {
+    const areas = ['Secretaría','Administración','Educativa','Servicios','Comunicación'];
+    const counts = {};
+    areas.forEach(a => counts[a] = 0);
+    let totalCarga = 0, cargaCount = 0;
+    allRows.forEach(r => {
+      if (counts[r.area] !== undefined) counts[r.area]++;
+      if (r.carga) { totalCarga += Number(r.carga); cargaCount++; }
+    });
+    const avgCarga = cargaCount ? (totalCarga / cargaCount).toFixed(1) : '—';
+    const anonCount = allRows.filter(r => r.anonimo === 'true' || r.anonimo === true).length;
+
+    const grid = document.getElementById('stats-grid');
+    grid.innerHTML = `
+      <div class="stat-card"><div class="label">Total respuestas</div><div class="value">${allRows.length}</div></div>
+      <div class="stat-card"><div class="label">Carga promedio</div><div class="value">${avgCarga}</div><div class="sub">sobre 5</div></div>
+      <div class="stat-card"><div class="label">Anónimas</div><div class="value">${anonCount}</div><div class="sub">de ${allRows.length}</div></div>
+      ${areas.map(a => `<div class="stat-card"><div class="label">${a}</div><div class="value">${counts[a]}</div><div class="sub">resp.</div></div>`).join('')}
+    `;
+  }
+
+  function filteredRows() {
+    const area  = document.getElementById('filter-area').value;
+    const carga = document.getElementById('filter-carga').value;
+    const text  = document.getElementById('filter-text').value.toLowerCase();
+    return allRows.filter(r => {
+      if (area  && r.area  !== area)  return false;
+      if (carga && String(r.carga) !== carga) return false;
+      if (text) {
+        const dump = JSON.stringify(r).toLowerCase();
+        if (!dump.includes(text)) return false;
+      }
+      return true;
+    });
+  }
+
+  function areaBadge(area) {
+    const map = {
+      'Secretaría':    'badge-sec',
+      'Administración':'badge-adm',
+      'Educativa':     'badge-edu',
+      'Servicios':     'badge-ser',
+      'Comunicación':  'badge-com',
+    };
+    return `<span class="badge ${map[area] || ''}">${area}</span>`;
+  }
+
+  function cargaBadge(c) {
+    if (!c) return '—';
+    return `<span class="carga-dot c${c}">${c}</span>`;
+  }
+
+  function shortDate(iso) {
+    if (!iso) return '—';
+    try { return new Date(iso).toLocaleDateString('es-AR', { day:'2-digit', month:'2-digit', year:'2-digit' }); }
+    catch { return iso; }
+  }
+
+  function cellLong(text) {
+    if (!text) return '<span style="color:var(--text-soft);font-style:italic;font-size:12px">—</span>';
+    const safe = text.replace(/</g,'&lt;').replace(/>/g,'&gt;');
+    return `<div class="cell-long collapsed" onclick="this.classList.toggle('collapsed')">${safe}</div>`;
+  }
+
+  function renderTable() {
+    const rows = filteredRows();
+    const container = document.getElementById('table-container');
+    if (rows.length === 0) {
+      container.innerHTML = `<div class="no-data"><p>Sin respuestas que coincidan</p><small>Probá cambiar los filtros</small></div>`;
+      return;
+    }
+    container.innerHTML = `
+      <table>
+        <thead>
+          <tr>
+            <th>Fecha</th>
+            <th>Área</th>
+            <th>Rol</th>
+            <th>Responsable</th>
+            <th>Carga</th>
+            <th>Tareas manuales</th>
+            <th>Trabas</th>
+            <th>Mejoras</th>
+            <th>Ver</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${rows.map((r, i) => `
+            <tr>
+              <td style="white-space:nowrap;font-size:12px;color:var(--text-soft)">${shortDate(r.timestamp)}</td>
+              <td>${areaBadge(r.area)}</td>
+              <td style="font-size:13px">${r.rol || '—'}</td>
+              <td style="font-size:12px">${(r.anonimo === 'true' || r.anonimo === true) ? '<span class="anon-tag">Anónima</span>' : (r.responsable || '<span class="anon-tag">—</span>')}</td>
+              <td style="text-align:center">${cargaBadge(r.carga)}</td>
+              <td>${cellLong(r.tareasManuales)}</td>
+              <td>${cellLong(r.trabas)}</td>
+              <td>${cellLong(r.cambios)}</td>
+              <td><button onclick='openDetail(${JSON.stringify(r).replace(/'/g,"&#39;")})' style="background:var(--pink-light);color:var(--pink-dark);border:none;border-radius:6px;padding:5px 12px;font-size:12px;font-weight:600;cursor:pointer">Ver todo</button></td>
+            </tr>
+          `).join('')}
+        </tbody>
+      </table>
+    `;
+  }
+
+  function openDetail(r) {
+    const safe = v => v ? String(v).replace(/</g,'&lt;') : '<span class="empty">Sin respuesta</span>';
+    let tareas = '';
+    try {
+      const t = JSON.parse(r.tareas || '[]');
+      tareas = t.length ? t.map(x => `• ${x.tarea} — ${x.frecuencia} (${x.tiempo})`).join('\n') : '—';
+    } catch { tareas = r.tareas || '—'; }
+
+    document.getElementById('detail-content').innerHTML = `
+      <h2>${r.area} · ${r.rol || '—'}</h2>
+      <div class="meta">${shortDate(r.timestamp)} · ${(r.anonimo === 'true' || r.anonimo === true) ? 'Respuesta anónima' : (r.responsable || 'Sin nombre')}</div>
+
+      <div class="detail-section">
+        <h3>Tareas cotidianas</h3>
+        <div class="detail-q">Mapa de tareas</div>
+        <div class="detail-a">${safe(tareas)}</div>
+        <div class="detail-q">Tareas manuales o automatizables</div>
+        <div class="detail-a ${!r.tareasManuales ? 'empty' : ''}">${safe(r.tareasManuales)}</div>
+      </div>
+
+      <div class="detail-section">
+        <h3>Coordinación con otras áreas</h3>
+        <div class="detail-q">Dependencias de otras áreas</div>
+        <div class="detail-a ${!r.dependencias ? 'empty' : ''}">${safe(r.dependencias)}</div>
+        <div class="detail-q">Cómo mejorar las dependencias</div>
+        <div class="detail-a ${!r.mejorasDep ? 'empty' : ''}">${safe(r.mejorasDep)}</div>
+        <div class="detail-q">Qué se traba o demora</div>
+        <div class="detail-a ${!r.trabas ? 'empty' : ''}">${safe(r.trabas)}</div>
+        <div class="detail-q">Cómo resolver las trabas</div>
+        <div class="detail-a ${!r.mejorasTrabas ? 'empty' : ''}">${safe(r.mejorasTrabas)}</div>
+      </div>
+
+      <div class="detail-section">
+        <h3>Carga y mejoras</h3>
+        <div class="detail-q">Carga de trabajo percibida</div>
+        <div class="detail-a">${r.carga ? `${r.carga} / 5` : '—'}</div>
+        <div class="detail-q">Picos de trabajo</div>
+        <div class="detail-a ${!r.picos ? 'empty' : ''}">${safe(r.picos)}</div>
+        <div class="detail-q">Qué cambiaría</div>
+        <div class="detail-a ${!r.cambios ? 'empty' : ''}">${safe(r.cambios)}</div>
+        <div class="detail-q">Cómo implementarlo</div>
+        <div class="detail-a ${!r.implementacion ? 'empty' : ''}">${safe(r.implementacion)}</div>
+      </div>
+    `;
+    document.getElementById('detail-overlay').classList.add('open');
+  }
+
+  function closeDetail(e) {
+    if (e.target === document.getElementById('detail-overlay')) closeDetailPanel();
+  }
+  function closeDetailPanel() {
+    document.getElementById('detail-overlay').classList.remove('open');
+  }
+
+  function exportCSV() {
+    const rows = filteredRows();
+    const headers = ['Fecha','Área','Rol','Responsable','Anónimo','Carga','Tareas manuales','Dependencias','Mejoras dep.','Trabas','Mejoras trabas','Picos','Cambios','Implementación'];
+    const lines = [headers.join(',')];
+    rows.forEach(r => {
+      const esc = v => `"${String(v||'').replace(/"/g,'""')}"`;
+      lines.push([
+        r.timestamp, r.area, r.rol, r.responsable, r.anonimo,
+        r.carga, r.tareasManuales, r.dependencias, r.mejorasDep,
+        r.trabas, r.mejorasTrabas, r.picos, r.cambios, r.implementacion
+      ].map(esc).join(','));
+    });
+    const blob = new Blob(['\ufeff' + lines.join('\n')], { type: 'text/csv;charset=utf-8;' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = `acadp-respuestas-${new Date().toISOString().slice(0,10)}.csv`;
+    a.click();
+  }
+</script>
+</body>
+</html>
