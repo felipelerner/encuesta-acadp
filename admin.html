@@ -198,6 +198,8 @@
       border-radius: 999px;
       white-space: nowrap;
     }
+    .badge-pre  { background: #FCE7F3; color: #831843; }
+    .badge-dir  { background: #FEE2E2; color: #991B1B; }
     .badge-sec  { background: #EDE9FE; color: #5B21B6; }
     .badge-adm  { background: #D1FAE5; color: #065F46; }
     .badge-edu  { background: #DBEAFE; color: #1E40AF; }
@@ -242,7 +244,7 @@
     }
     .detail-overlay.open .detail-panel { transform: translateX(0); }
     .detail-close {
-      float: right;
+      position: absolute; top: 20px; right: 20px;
       background: var(--pink-light);
       border: none;
       color: var(--pink-dark);
@@ -251,23 +253,61 @@
       border-radius: 50%;
       cursor: pointer;
       font-weight: 700;
+      line-height: 1;
+      display: flex; align-items: center; justify-content: center;
     }
-    .detail-panel h2 { font-size: 16px; font-weight: 700; margin-bottom: 4px; }
-    .detail-panel .meta { font-size: 12px; color: var(--text-soft); margin-bottom: 20px; }
-    .detail-section { margin-bottom: 20px; }
+    .detail-panel { position: relative; padding: 0; }
+    .detail-hero {
+      background: linear-gradient(135deg, var(--pink-dark), var(--pink));
+      color: white;
+      padding: 24px 28px 20px;
+    }
+    .detail-hero h2 { font-size: 18px; font-weight: 700; margin-bottom: 4px; line-height: 1.3; }
+    .detail-hero .meta { font-size: 12px; opacity: 0.8; }
+    .detail-chips {
+      display: flex; gap: 8px; flex-wrap: wrap; margin-top: 12px;
+    }
+    .detail-chip {
+      display: inline-flex; align-items: center; gap: 5px;
+      background: rgba(255,255,255,0.18);
+      border: 1px solid rgba(255,255,255,0.25);
+      border-radius: 999px;
+      padding: 3px 12px;
+      font-size: 12px; font-weight: 500;
+    }
+    .detail-body { padding: 20px 28px 32px; }
+    .detail-section { margin-bottom: 24px; }
     .detail-section h3 {
-      font-size: 11px;
-      font-weight: 600;
+      font-size: 10px;
+      font-weight: 700;
       text-transform: uppercase;
-      letter-spacing: 0.06em;
-      color: var(--text-soft);
-      border-bottom: 1px solid var(--border);
+      letter-spacing: 0.08em;
+      color: var(--pink);
+      border-bottom: 2px solid var(--pink-light);
       padding-bottom: 6px;
-      margin-bottom: 10px;
+      margin-bottom: 14px;
     }
-    .detail-q { font-size: 12px; font-weight: 500; color: var(--text-mid); margin-bottom: 3px; }
-    .detail-a { font-size: 13px; color: var(--text); line-height: 1.6; margin-bottom: 12px; white-space: pre-wrap; }
-    .detail-a.empty { color: var(--text-soft); font-style: italic; }
+    .detail-item { margin-bottom: 14px; }
+    .detail-q {
+      font-size: 11px; font-weight: 600;
+      color: var(--text-soft);
+      text-transform: uppercase; letter-spacing: 0.04em;
+      margin-bottom: 4px;
+    }
+    .detail-a {
+      font-size: 13px; color: var(--text);
+      line-height: 1.65; white-space: pre-wrap;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 8px 12px;
+    }
+    .detail-a.empty {
+      color: var(--text-soft); font-style: italic;
+      background: none; border: 1px dashed var(--border);
+    }
+    .detail-a ul { padding-left: 16px; }
+    .detail-a li { margin-bottom: 3px; }
 
     .no-data {
       text-align: center;
@@ -328,6 +368,8 @@
       <label>Filtrar por área:</label>
       <select id="filter-area" onchange="renderTable()">
         <option value="">Todas</option>
+        <option>Presidencia</option>
+        <option>Dirección ejecutiva</option>
         <option>Secretaría</option>
         <option>Administración</option>
         <option>Educativa</option>
@@ -357,7 +399,6 @@
 <!-- Detail panel -->
 <div class="detail-overlay" id="detail-overlay" onclick="closeDetail(event)">
   <div class="detail-panel" id="detail-panel">
-    <button class="detail-close" onclick="closeDetailPanel()">×</button>
     <div id="detail-content"></div>
   </div>
 </div>
@@ -403,7 +444,7 @@
   }
 
   function renderStats() {
-    const areas = ['Secretaría','Administración','Educativa','Servicios','Comunicación'];
+    const areas = ['Presidencia','Dirección ejecutiva','Secretaría','Administración','Educativa','Servicios','Comunicación'];
     const counts = {};
     areas.forEach(a => counts[a] = 0);
     let totalCarga = 0, cargaCount = 0;
@@ -440,11 +481,13 @@
 
   function areaBadge(area) {
     const map = {
-      'Secretaría':    'badge-sec',
-      'Administración':'badge-adm',
-      'Educativa':     'badge-edu',
-      'Servicios':     'badge-ser',
-      'Comunicación':  'badge-com',
+      'Presidencia':        'badge-pre',
+      'Dirección ejecutiva':'badge-dir',
+      'Secretaría':         'badge-sec',
+      'Administración':     'badge-adm',
+      'Educativa':          'badge-edu',
+      'Servicios':          'badge-ser',
+      'Comunicación':       'badge-com',
     };
     return `<span class="badge ${map[area] || ''}">${area}</span>`;
   }
@@ -508,47 +551,61 @@
   }
 
   function openDetail(r) {
-    const safe = v => v ? String(v).replace(/</g,'&lt;') : '<span class="empty">Sin respuesta</span>';
-    let tareas = '';
+    const esc  = v => v ? String(v).replace(/</g,'&lt;').replace(/>/g,'&gt;') : null;
+    const safe = v => esc(v) || '';
+    const block = (label, val) => `
+      <div class="detail-item">
+        <div class="detail-q">${label}</div>
+        <div class="detail-a${!val ? ' empty' : ''}">${esc(val) || 'Sin respuesta'}</div>
+      </div>`;
+
+    let tareasHtml = '';
     try {
       const t = Array.isArray(r.tareas) ? r.tareas : JSON.parse(r.tareas || '[]');
-      tareas = t.length ? t.map(x => `• ${x.tarea} — ${x.frecuencia} (${x.tiempo})`).join('\n') : '—';
-    } catch { tareas = JSON.stringify(r.tareas) || '—'; }
+      tareasHtml = t.length
+        ? `<ul>${t.map(x => `<li><strong>${safe(x.tarea)}</strong> — ${safe(x.frecuencia)}${x.tiempo ? ` · ${safe(x.tiempo)}` : ''}</li>`).join('')}</ul>`
+        : null;
+    } catch { tareasHtml = safe(JSON.stringify(r.tareas)); }
+
+    const isAnon = r.anonimo === true || r.anonimo === 'true';
+    const cargaLabels = { 1:'Muy liviana', 2:'Liviana', 3:'Moderada', 4:'Pesada', 5:'Muy pesada' };
 
     document.getElementById('detail-content').innerHTML = `
-      <h2>${r.area} · ${r.rol || '—'}</h2>
-      <div class="meta">${shortDate(r.created_at)} · ${(r.anonimo === 'true' || r.anonimo === true) ? 'Respuesta anónima' : (r.responsable || 'Sin nombre')}</div>
-
-      <div class="detail-section">
-        <h3>Tareas cotidianas</h3>
-        <div class="detail-q">Mapa de tareas</div>
-        <div class="detail-a">${safe(tareas)}</div>
-        <div class="detail-q">Tareas manuales o automatizables</div>
-        <div class="detail-a ${!r.tareas_manuales ? 'empty' : ''}">${safe(r.tareas_manuales)}</div>
+      <div class="detail-hero">
+        <button class="detail-close" onclick="closeDetailPanel()">×</button>
+        <h2>${safe(r.area)} · ${safe(r.rol) || '—'}</h2>
+        <div class="meta">${shortDate(r.created_at)} · ${isAnon ? 'Anónima' : (safe(r.responsable) || 'Sin nombre')}</div>
+        <div class="detail-chips">
+          ${r.carga ? `<span class="detail-chip">⚡ Carga ${r.carga}/5 — ${cargaLabels[r.carga] || ''}</span>` : ''}
+          ${r.horas_dia ? `<span class="detail-chip">🕐 ${r.horas_dia} hs/día</span>` : ''}
+          ${isAnon ? '<span class="detail-chip">🔒 Anónima</span>' : ''}
+        </div>
       </div>
 
-      <div class="detail-section">
-        <h3>Coordinación con otras áreas</h3>
-        <div class="detail-q">Dependencias de otras áreas</div>
-        <div class="detail-a ${!r.dependencias ? 'empty' : ''}">${safe(r.dependencias)}</div>
-        <div class="detail-q">Cómo mejorar las dependencias</div>
-        <div class="detail-a ${!r.mejoras_dep ? 'empty' : ''}">${safe(r.mejoras_dep)}</div>
-        <div class="detail-q">Qué se traba o demora</div>
-        <div class="detail-a ${!r.trabas ? 'empty' : ''}">${safe(r.trabas)}</div>
-        <div class="detail-q">Cómo resolver las trabas</div>
-        <div class="detail-a ${!r.mejoras_trabas ? 'empty' : ''}">${safe(r.mejoras_trabas)}</div>
-      </div>
+      <div class="detail-body">
+        <div class="detail-section">
+          <h3>Tareas cotidianas</h3>
+          <div class="detail-item">
+            <div class="detail-q">Mapa de tareas</div>
+            <div class="detail-a${!tareasHtml ? ' empty' : ''}">${tareasHtml || 'Sin respuesta'}</div>
+          </div>
+          ${block('Tareas manuales o automatizables', r.tareas_manuales)}
+        </div>
 
-      <div class="detail-section">
-        <h3>Carga y mejoras</h3>
-        <div class="detail-q">Carga de trabajo percibida</div>
-        <div class="detail-a">${r.carga ? `${r.carga} / 5` : '—'}</div>
-        <div class="detail-q">Picos de trabajo</div>
-        <div class="detail-a ${!r.picos ? 'empty' : ''}">${safe(r.picos)}</div>
-        <div class="detail-q">Qué cambiaría</div>
-        <div class="detail-a ${!r.cambios ? 'empty' : ''}">${safe(r.cambios)}</div>
-        <div class="detail-q">Cómo implementarlo</div>
-        <div class="detail-a ${!r.implementacion ? 'empty' : ''}">${safe(r.implementacion)}</div>
+        <div class="detail-section">
+          <h3>Coordinación con otras áreas</h3>
+          ${block('Dependencias de otras áreas', r.dependencias)}
+          ${block('Cómo mejorar las dependencias', r.mejoras_dep)}
+          ${block('Qué se traba o demora', r.trabas)}
+          ${block('Cómo resolver las trabas', r.mejoras_trabas)}
+        </div>
+
+        <div class="detail-section">
+          <h3>Carga y mejoras</h3>
+          ${block('Picos de carga en el año', r.picos)}
+          ${block('Qué cambiaría', r.cambios)}
+          ${block('Cómo lo implementaría', r.implementacion)}
+        </div>
       </div>
     `;
     document.getElementById('detail-overlay').classList.add('open');
