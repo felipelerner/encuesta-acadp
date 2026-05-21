@@ -312,11 +312,10 @@
 <div id="login-wrap" class="login-wrap">
   <div class="login-card">
     <h2>Acceso al panel</h2>
-    <p>Este panel muestra todas las respuestas del formulario de relevamiento. Ingresá la clave de acceso para continuar.</p>
-    <input type="url" id="script-url" placeholder="URL del Google Apps Script" />
-    <input type="password" id="secret-key" placeholder="Clave de acceso (SECRET_KEY)" onkeydown="if(event.key==='Enter') doLogin()" />
+    <p>Ingresá la clave para ver las respuestas del relevamiento.</p>
+    <input type="password" id="secret-key" placeholder="Clave de acceso" onkeydown="if(event.key==='Enter') doLogin()" autofocus />
     <button class="btn-login" onclick="doLogin()">Ingresar</button>
-    <p class="login-error" id="login-error">Clave incorrecta o URL inválida.</p>
+    <p class="login-error" id="login-error">Clave incorrecta.</p>
   </div>
 </div>
 
@@ -364,16 +363,16 @@
 </div>
 
 <script>
+  const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbw04sgXvpm94OnVaVMqj-zzeugib03NLjcJ7JDsd263VfqLAVUYvjk1IIKQZyCdK-y_A/exec';
   let allRows = [];
-  let scriptUrl = '';
+  let scriptUrl = SCRIPT_URL;
   let secretKey = '';
 
   function doLogin() {
-    scriptUrl = document.getElementById('script-url').value.trim();
-    secretKey  = document.getElementById('secret-key').value.trim();
-    if (!scriptUrl || !secretKey) {
+    secretKey = document.getElementById('secret-key').value.trim();
+    if (!secretKey) {
       document.getElementById('login-error').style.display = 'block';
-      document.getElementById('login-error').textContent = 'Completá la URL y la clave.';
+      document.getElementById('login-error').textContent = 'Ingresá la clave.';
       return;
     }
     loadData();
