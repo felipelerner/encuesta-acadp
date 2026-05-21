@@ -363,16 +363,21 @@
 </div>
 
 <script>
-  const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbw04sgXvpm94OnVaVMqj-zzeugib03NLjcJ7JDsd263VfqLAVUYvjk1IIKQZyCdK-y_A/exec';
+  const SUPABASE_URL     = 'https://bwkzxtteoghdeelysyir.supabase.co';
+  const SUPABASE_SERVICE = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ3a3p4dHRlb2doZGVlbHlzeWlyIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3OTM2MzM0NiwiZXhwIjoyMDk0OTM5MzQ2fQ.f6mpI4fvynvkXLwK--gBQ44aI9rb6nEpO6h6lrxj8QM';
+  const ADMIN_PASSWORD   = 'acadp2025';
   let allRows = [];
-  let scriptUrl = SCRIPT_URL;
-  let secretKey = '';
 
   function doLogin() {
-    secretKey = document.getElementById('secret-key').value.trim();
-    if (!secretKey) {
+    const key = document.getElementById('secret-key').value.trim();
+    if (!key) {
       document.getElementById('login-error').style.display = 'block';
       document.getElementById('login-error').textContent = 'Ingresá la clave.';
+      return;
+    }
+    if (key !== ADMIN_PASSWORD) {
+      document.getElementById('login-error').style.display = 'block';
+      document.getElementById('login-error').textContent = 'Clave incorrecta.';
       return;
     }
     loadData();
@@ -381,15 +386,11 @@
   async function loadData() {
     document.getElementById('table-container').innerHTML = '<div class="loading">Cargando respuestas…</div>';
     try {
-      const url = `${scriptUrl}?key=${encodeURIComponent(secretKey)}`;
-      const res  = await fetch(url);
-      const data = await res.json();
-      if (data.error) {
-        document.getElementById('login-error').style.display = 'block';
-        document.getElementById('login-error').textContent = 'Clave incorrecta.';
-        return;
-      }
-      allRows = data.rows || [];
+      const res = await fetch(
+        `${SUPABASE_URL}/rest/v1/respuestas?select=*&order=created_at.desc`,
+        { headers: { 'apikey': SUPABASE_SERVICE, 'Authorization': `Bearer ${SUPABASE_SERVICE}` } }
+      );
+      allRows = await res.json();
       document.getElementById('login-wrap').style.display = 'none';
       document.getElementById('dashboard').style.display = 'block';
       document.getElementById('header-actions').style.display = 'flex';
@@ -397,7 +398,7 @@
       renderTable();
     } catch (e) {
       document.getElementById('login-error').style.display = 'block';
-      document.getElementById('login-error').textContent = 'No se pudo conectar. Verificá la URL.';
+      document.getElementById('login-error').textContent = 'No se pudo conectar con Supabase.';
     }
   }
 
@@ -490,12 +491,12 @@
         <tbody>
           ${rows.map((r, i) => `
             <tr>
-              <td style="white-space:nowrap;font-size:12px;color:var(--text-soft)">${shortDate(r.timestamp)}</td>
+              <td style="white-space:nowrap;font-size:12px;color:var(--text-soft)">${shortDate(r.created_at)}</td>
               <td>${areaBadge(r.area)}</td>
               <td style="font-size:13px">${r.rol || '—'}</td>
               <td style="font-size:12px">${(r.anonimo === 'true' || r.anonimo === true) ? '<span class="anon-tag">Anónima</span>' : (r.responsable || '<span class="anon-tag">—</span>')}</td>
               <td style="text-align:center">${cargaBadge(r.carga)}</td>
-              <td>${cellLong(r.tareasManuales)}</td>
+              <td>${cellLong(r.tareas_manuales)}</td>
               <td>${cellLong(r.trabas)}</td>
               <td>${cellLong(r.cambios)}</td>
               <td><button onclick='openDetail(${JSON.stringify(r).replace(/'/g,"&#39;")})' style="background:var(--pink-light);color:var(--pink-dark);border:none;border-radius:6px;padding:5px 12px;font-size:12px;font-weight:600;cursor:pointer">Ver todo</button></td>
@@ -510,20 +511,20 @@
     const safe = v => v ? String(v).replace(/</g,'&lt;') : '<span class="empty">Sin respuesta</span>';
     let tareas = '';
     try {
-      const t = JSON.parse(r.tareas || '[]');
+      const t = Array.isArray(r.tareas) ? r.tareas : JSON.parse(r.tareas || '[]');
       tareas = t.length ? t.map(x => `• ${x.tarea} — ${x.frecuencia} (${x.tiempo})`).join('\n') : '—';
-    } catch { tareas = r.tareas || '—'; }
+    } catch { tareas = JSON.stringify(r.tareas) || '—'; }
 
     document.getElementById('detail-content').innerHTML = `
       <h2>${r.area} · ${r.rol || '—'}</h2>
-      <div class="meta">${shortDate(r.timestamp)} · ${(r.anonimo === 'true' || r.anonimo === true) ? 'Respuesta anónima' : (r.responsable || 'Sin nombre')}</div>
+      <div class="meta">${shortDate(r.created_at)} · ${(r.anonimo === 'true' || r.anonimo === true) ? 'Respuesta anónima' : (r.responsable || 'Sin nombre')}</div>
 
       <div class="detail-section">
         <h3>Tareas cotidianas</h3>
         <div class="detail-q">Mapa de tareas</div>
         <div class="detail-a">${safe(tareas)}</div>
         <div class="detail-q">Tareas manuales o automatizables</div>
-        <div class="detail-a ${!r.tareasManuales ? 'empty' : ''}">${safe(r.tareasManuales)}</div>
+        <div class="detail-a ${!r.tareas_manuales ? 'empty' : ''}">${safe(r.tareas_manuales)}</div>
       </div>
 
       <div class="detail-section">
@@ -531,11 +532,11 @@
         <div class="detail-q">Dependencias de otras áreas</div>
         <div class="detail-a ${!r.dependencias ? 'empty' : ''}">${safe(r.dependencias)}</div>
         <div class="detail-q">Cómo mejorar las dependencias</div>
-        <div class="detail-a ${!r.mejorasDep ? 'empty' : ''}">${safe(r.mejorasDep)}</div>
+        <div class="detail-a ${!r.mejoras_dep ? 'empty' : ''}">${safe(r.mejoras_dep)}</div>
         <div class="detail-q">Qué se traba o demora</div>
         <div class="detail-a ${!r.trabas ? 'empty' : ''}">${safe(r.trabas)}</div>
         <div class="detail-q">Cómo resolver las trabas</div>
-        <div class="detail-a ${!r.mejorasTrabas ? 'empty' : ''}">${safe(r.mejorasTrabas)}</div>
+        <div class="detail-a ${!r.mejoras_trabas ? 'empty' : ''}">${safe(r.mejoras_trabas)}</div>
       </div>
 
       <div class="detail-section">
@@ -567,9 +568,9 @@
     rows.forEach(r => {
       const esc = v => `"${String(v||'').replace(/"/g,'""')}"`;
       lines.push([
-        r.timestamp, r.area, r.rol, r.responsable, r.anonimo,
-        r.carga, r.tareasManuales, r.dependencias, r.mejorasDep,
-        r.trabas, r.mejorasTrabas, r.picos, r.cambios, r.implementacion
+        r.created_at, r.area, r.rol, r.responsable, r.anonimo,
+        r.carga, r.tareas_manuales, r.dependencias, r.mejoras_dep,
+        r.trabas, r.mejoras_trabas, r.picos, r.cambios, r.implementacion
       ].map(esc).join(','));
     });
     const blob = new Blob(['\ufeff' + lines.join('\n')], { type: 'text/csv;charset=utf-8;' });

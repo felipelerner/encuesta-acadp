@@ -781,10 +781,8 @@
 <div class="toast" id="toast"></div>
 
 <script>
-  /* ─── CONFIGURACIÓN ──────────────────────────────────────────── */
-  // Pegá aquí la URL de tu Google Apps Script (ver instrucciones.txt)
-  const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbw04sgXvpm94OnVaVMqj-zzeugib03NLjcJ7JDsd263VfqLAVUYvjk1IIKQZyCdK-y_A/exec';
-  /* ─────────────────────────────────────────────────────────────── */
+  const SUPABASE_URL  = 'https://bwkzxtteoghdeelysyir.supabase.co';
+  const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ3a3p4dHRlb2doZGVlbHlzeWlyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkzNjMzNDYsImV4cCI6MjA5NDkzOTM0Nn0.1EnEYt-1LDSEvoFBXs4j2VkwAyiyXO4MOT2Hn_KTztw';
 
   let cargaVal = null;
 
@@ -878,28 +876,22 @@
     if (!area) { showToast('Seleccioná tu área antes de enviar', 'error'); return; }
     if (!rol.trim()) { showToast('Indicá tu rol dentro del área', 'error'); return; }
 
-    if (!SCRIPT_URL || SCRIPT_URL === 'TU_SCRIPT_URL_AQUI') {
-      showToast('El formulario no está configurado todavía (falta SCRIPT_URL)', 'error');
-      return;
-    }
-
     const payload = {
-      timestamp:      new Date().toISOString(),
-      anonimo:        document.getElementById('anon-check').checked,
-      responsable:    document.getElementById('responsable')?.value || '',
+      anonimo:         document.getElementById('anon-check').checked,
+      responsable:     document.getElementById('responsable')?.value || '',
       area,
       rol,
-      tareas:         JSON.stringify(getTasksData()),
-      tareasManuales: document.getElementById('tareas-manuales').value,
-      dependencias:   document.getElementById('dependencias').value,
-      mejorasDep:     document.getElementById('mejoras-dep').value,
-      trabas:         document.getElementById('trabas').value,
-      mejorasTrabas:  document.getElementById('mejoras-trabas').value,
-      carga:          cargaVal || '',
-      horasDia:       document.getElementById('horas-slider').value,
-      picos:          document.getElementById('picos').value,
-      cambios:        document.getElementById('cambios').value,
-      implementacion: document.getElementById('implementacion').value,
+      tareas:          getTasksData(),
+      tareas_manuales: document.getElementById('tareas-manuales').value,
+      dependencias:    document.getElementById('dependencias').value,
+      mejoras_dep:     document.getElementById('mejoras-dep').value,
+      trabas:          document.getElementById('trabas').value,
+      mejoras_trabas:  document.getElementById('mejoras-trabas').value,
+      carga:           cargaVal || null,
+      horas_dia:       parseInt(document.getElementById('horas-slider').value),
+      picos:           document.getElementById('picos').value,
+      cambios:         document.getElementById('cambios').value,
+      implementacion:  document.getElementById('implementacion').value,
     };
 
     const btn = document.querySelector('.submit-btn');
@@ -907,15 +899,25 @@
     btn.textContent = 'Enviando…';
 
     try {
-      await fetch(SCRIPT_URL, {
+      const res = await fetch(`${SUPABASE_URL}/rest/v1/respuestas`, {
         method: 'POST',
-        mode: 'no-cors',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          'apikey': SUPABASE_ANON,
+          'Authorization': `Bearer ${SUPABASE_ANON}`,
+          'Prefer': 'return=minimal',
+        },
         body: JSON.stringify(payload),
       });
-      document.getElementById('success-overlay').classList.add('show');
+      if (res.ok || res.status === 201) {
+        document.getElementById('success-overlay').classList.add('show');
+      } else {
+        const err = await res.text();
+        console.error(err);
+        showToast('Error al enviar. Intentá de nuevo.', 'error');
+      }
     } catch (err) {
-      showToast('Error al enviar. Revisá tu conexión e intentá de nuevo.', 'error');
+      showToast('Error al enviar. Revisá tu conexión.', 'error');
     } finally {
       btn.disabled = false;
       btn.innerHTML = `<svg viewBox="0 0 24 24" style="width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg> Enviar respuestas`;
