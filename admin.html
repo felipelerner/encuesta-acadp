@@ -223,26 +223,34 @@
 
     .anon-tag { font-size: 11px; color: var(--text-soft); font-style: italic; }
 
-    /* Detail panel */
+    /* Detail modal */
     .detail-overlay {
       display: none;
       position: fixed; inset: 0;
-      background: rgba(139,26,94,0.5);
+      background: rgba(26,10,37,0.6);
+      backdrop-filter: blur(4px);
       z-index: 300;
+      align-items: center;
+      justify-content: center;
+      padding: 24px 16px;
     }
-    .detail-overlay.open { display: block; }
+    .detail-overlay.open { display: flex; }
     .detail-panel {
-      position: fixed;
-      right: 0; top: 0; bottom: 0;
-      width: min(560px, 100vw);
       background: white;
+      border-radius: 16px;
+      width: 100%;
+      max-width: 720px;
+      max-height: 88vh;
       overflow-y: auto;
-      padding: 28px;
-      box-shadow: -8px 0 32px rgba(0,0,0,0.12);
-      transform: translateX(100%);
-      transition: transform 0.25s ease;
+      box-shadow: 0 24px 64px rgba(0,0,0,0.22);
+      transform: scale(0.96) translateY(12px);
+      opacity: 0;
+      transition: transform 0.2s ease, opacity 0.2s ease;
     }
-    .detail-overlay.open .detail-panel { transform: translateX(0); }
+    .detail-overlay.open .detail-panel {
+      transform: scale(1) translateY(0);
+      opacity: 1;
+    }
     .detail-close {
       position: absolute; top: 20px; right: 20px;
       background: var(--pink-light);
